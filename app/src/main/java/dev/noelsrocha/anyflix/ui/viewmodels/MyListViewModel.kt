@@ -7,6 +7,7 @@ import dev.noelsrocha.anyflix.database.entities.toMovie
 import dev.noelsrocha.anyflix.model.Movie
 import dev.noelsrocha.anyflix.ui.uistates.MyListUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.noelsrocha.anyflix.repositories.MovieRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -14,7 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MyListViewModel @Inject constructor(
-    private val dao: MovieDao
+    private val repository: MovieRepository
 ) : ViewModel() {
 
     private var currentUiStateJob: Job? = null
@@ -31,11 +32,8 @@ class MyListViewModel @Inject constructor(
         currentUiStateJob?.cancel()
         currentUiStateJob = viewModelScope.launch {
 
-            dao.myList()
-                .onStart {
-                    _uiState.update { MyListUiState.Loading }
-                }
-                .map { entities -> entities.map { it.toMovie() } }
+            repository.myList()
+                .onStart { _uiState.update { MyListUiState.Loading } }
                 .collect { movies ->
                     _uiState.update {
                         if (movies.isEmpty()) {
@@ -49,7 +47,7 @@ class MyListViewModel @Inject constructor(
     }
 
     suspend fun removeFromMyList(movie: Movie) {
-        dao.removeFromMyList(movie.id)
+        repository.removeFromMyList(movie.id)
     }
 
     fun loadMyList() {

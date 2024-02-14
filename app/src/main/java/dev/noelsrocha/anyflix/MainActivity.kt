@@ -1,7 +1,6 @@
 package dev.noelsrocha.anyflix
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -33,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import dagger.hilt.android.AndroidEntryPoint
 import dev.noelsrocha.anyflix.navigation.AnyflixNavHost
 import dev.noelsrocha.anyflix.navigation.homeRoute
 import dev.noelsrocha.anyflix.navigation.movieDetailsRouteFullpath
@@ -41,13 +41,13 @@ import dev.noelsrocha.anyflix.navigation.navigateToBottomAppBarItem
 import dev.noelsrocha.anyflix.ui.components.AnyflixBottomAppBar
 import dev.noelsrocha.anyflix.ui.components.BottomAppBarItem
 import dev.noelsrocha.anyflix.ui.theme.AnyFlixTheme
-import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             AnyFlixTheme {
                 Surface(

@@ -14,6 +14,9 @@ interface MovieDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun save(movie: MovieEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun saveAll(vararg entities: MovieEntity)
+
     @Query("SELECT * FROM movies")
     fun findAll(): Flow<List<MovieEntity>>
 

@@ -2,19 +2,18 @@ package dev.noelsrocha.anyflix.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.noelsrocha.anyflix.database.dao.MovieDao
-import dev.noelsrocha.anyflix.database.entities.toMovie
-import dev.noelsrocha.anyflix.model.Movie
 import dev.noelsrocha.anyflix.ui.uistates.HomeUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.noelsrocha.anyflix.repositories.MovieRepository
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val dao: MovieDao
+    private val repository: MovieRepository
 ) : ViewModel() {
 
     private var currentUiStateJob: Job? = null
@@ -30,45 +29,29 @@ class HomeViewModel @Inject constructor(
     private fun loadUiState() {
         currentUiStateJob?.cancel()
         currentUiStateJob = viewModelScope.launch {
-            dao.findAll()
-                .onStart {
+            repository.findSections().onStart {
                     _uiState.update { HomeUiState.Loading }
-                }
-                .map { entities ->
-                    val movies = entities.map { it.toMovie() }
-                    if (movies.isEmpty()) {
-                        emptyMap()
-                    } else {
-                        createSections(movies)
-                    }
-                }.collectLatest { sections ->
-                    if (sections.isEmpty()) {
-                        _uiState.update {
-                            HomeUiState.Empty
-                        }
-                    } else {
-                        val movie = sections
-                            .entries.random()
-                            .value.random()
-                        _uiState.update {
-                            HomeUiState.Success(
-                                sections = sections,
-                                mainBannerMovie = movie
-                            )
-                        }
+            }.collectLatest { sections ->
+                if (sections.isEmpty()) {
+                    delay(3000)
+                    _uiState.update { HomeUiState.Empty }
+                } else {
+                    val movie = sections
+                        .entries.random()
+                        .value.random()
+                    _uiState.update {
+                        HomeUiState.Success(
+                            sections = sections,
+                            mainBannerMovie = movie
+                        )
                     }
                 }
+            }
         }
     }
 
     fun loadSections() {
         loadUiState()
     }
-
-    private fun createSections(movies: List<Movie>) = mapOf(
-        "Em alta" to movies.shuffled().take(7),
-        "Novidades" to movies.shuffled().take(7),
-        "Continue assistindo" to movies.shuffled().take(7)
-    )
 
 }
